@@ -21,7 +21,7 @@ ADMIN_EMAIL = "admin@moto.com"
 ADMIN_PASSWORD = "vishnu@2003@moto"
 COOKIE_NAME = "motorox_session"
 COOKIE_SECRET = "moto_secret_2026_prod"
-BASE = "http://localhost:8000"  # Direct backend URL for admin forms
+BASE = "https://backend-m-evpd.onrender.com"  # Deployed backend URL
 
 # ─── Database ─────────────────────────────────────────────────────────────────
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
@@ -117,7 +117,7 @@ def admin_login_page(error: Optional[str] = None):
 def admin_login(email: str = Form(...), password: str = Form(...)):
     if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
         resp = RedirectResponse(url="/admin1448/dashboard", status_code=303)
-        resp.set_cookie(key=COOKIE_NAME, value=COOKIE_SECRET, httponly=True, samesite="lax")
+        resp.set_cookie(key=COOKIE_NAME, value=COOKIE_SECRET, httponly=True, samesite="lax", secure=True)
         return resp
     return RedirectResponse(url="/admin1448?error=Invalid+credentials", status_code=303)
 
