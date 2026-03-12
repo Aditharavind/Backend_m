@@ -364,6 +364,71 @@ async def admin_add_car(
 
     return RedirectResponse(url="/admin1448/dashboard", status_code=303)
 
+
+# ─── FIX: Update Car ──────────────────────────────────────────────────────────
+
+@app.post("/admin1448/update/{car_id}")
+async def admin_update_car(
+    car_id: int,
+    name: str = Form(...),
+    rate: int = Form(...),
+    desc: str = Form(...),
+    available: Optional[str] = Form(None),
+    img1: Optional[UploadFile] = File(None),
+    img2: Optional[UploadFile] = File(None),
+    img3: Optional[UploadFile] = File(None),
+    user: str = Depends(check_admin),
+    db: Session = Depends(get_db),
+):
+    if not user:
+        return RedirectResponse(url="/admin1448", status_code=303)
+
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Car not found")
+
+    car.name = name
+    car.rate = rate
+    car.desc = desc
+    # Checkbox: present = checked, absent = unchecked
+    car.available = available is not None
+
+    # Only replace images if a new file was actually uploaded
+    if img1 and img1.filename:
+        car.image1 = save_upload(img1)
+
+    if img2 and img2.filename:
+        car.image2 = save_upload(img2)
+
+    if img3 and img3.filename:
+        car.image3 = save_upload(img3)
+
+    db.commit()
+
+    return RedirectResponse(url="/admin1448/dashboard", status_code=303)
+
+
+# ─── FIX: Delete Car ──────────────────────────────────────────────────────────
+
+@app.get("/admin1448/delete/{car_id}")
+def admin_delete_car(
+    car_id: int,
+    user: str = Depends(check_admin),
+    db: Session = Depends(get_db),
+):
+    if not user:
+        return RedirectResponse(url="/admin1448", status_code=303)
+
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Car not found")
+
+    db.delete(car)
+    db.commit()
+
+    return RedirectResponse(url="/admin1448/dashboard", status_code=303)
+
+
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
